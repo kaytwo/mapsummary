@@ -86,7 +86,7 @@ module.exports = (env) => {
     devServer: {
       liveReload: true,
       host: "0.0.0.0",
-      firewall: false,
+      allowedHosts: "auto",
       hot: false,
     },
     externals: {
