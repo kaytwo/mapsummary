@@ -15,7 +15,36 @@
  */
 /* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-vars */
 import "./style.css";
+const stylesArray = [
+  {
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.neighborhood",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  }
+]
+
+
 const layers = require("json-loader!./commaps.geojson");
+const moreLayers = require("json-loader!./hearings.geojson");
 
 async function initMap() {
   const myLatlng = { lat: 41.8348769, lng: -87.7881208 };
@@ -23,8 +52,10 @@ async function initMap() {
   const map = new google.maps.Map(document.getElementById("map")!, {
     zoom: 11.5,
     center: myLatlng,
+    styles: stylesArray
   });
   map.data.addGeoJson(layers);
+  map.data.addGeoJson(moreLayers);
   map.data.setStyle({ clickable: false });
   map.data.setStyle(function (feature) {
     var color = "gray";
@@ -65,9 +96,14 @@ async function initMap() {
             testPoly
           )
         ) {
+          let label;
           // console.log(testPoly);
+          if(x.getProperty('jsonfile') != null)
+            label = `hearing: ${x.getProperty('jsonfile')}`;
+          else
+            label = `representable: ${x.getProperty('file').split('/')[1]}`
 
-          output.push(`${x.getProperty('file').split('/')[1]}`)
+          output.push(label)
           x.forEachProperty((x,y) => console.log(`x:${x}\ny:${y}`))
           x.setProperty("isColorful", true);
         } else x.setProperty("isColorful", false);
