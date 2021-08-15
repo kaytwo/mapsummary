@@ -82,7 +82,7 @@ async function initMap() {
   map.addListener("click", (mapsMouseEvent) => {
     // Close the current InfoWindow.
     const text = document.createElement("div");
-
+    let empty = true;
     map.data.forEach((x) => {
       const g = x.getGeometry();
       if (g instanceof google.maps.Data.MultiPolygon) {
@@ -95,12 +95,12 @@ async function initMap() {
             testPoly
           )
         ) {
+          empty = false;
           let label;
           let id;
-          // console.log(testPoly);
           if (x.getProperty("jsonfile") != null) {
             id = x.getProperty("jsonfile");
-            label = `hearing: ${id.substring(0,id.lastIndexOf('.json'))}`;
+            label = `hearing: ${id.substring(0, id.lastIndexOf(".json"))}`;
           } else {
             label = `representable: ${x.getProperty("file").split("/")[1]}`;
             id = x.getProperty("file");
@@ -113,24 +113,23 @@ async function initMap() {
             );
             map.data.getFeatureById(id)?.setProperty("isColorful", true);
           });
-          child.classList.add('clickable')
+          child.classList.add("clickable");
           text.appendChild(child);
-          // output.push(label)
-          x.forEachProperty((x, y) => console.log(`x:${x}\ny:${y}`));
           x.setProperty("isColorful", true);
         } else x.setProperty("isColorful", false);
       }
     });
     infoWindow.close();
+    if (!empty) {
       // Create a new InfoWindow.
       infoWindow = new google.maps.InfoWindow({
         position: mapsMouseEvent.latLng,
       });
       infoWindow.setContent(
-        text // output.join("<br/>")
-        // JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+        text 
       );
       infoWindow.open(map);
+    }
   });
 }
 
