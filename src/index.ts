@@ -17,34 +17,33 @@
 import "./style.css";
 const stylesArray = [
   {
-    "elementType": "labels",
-    "stylers": [
+    elementType: "labels",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "administrative.land_parcel",
-    "stylers": [
+    featureType: "administrative.land_parcel",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "administrative.neighborhood",
-    "stylers": [
+    featureType: "administrative.neighborhood",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
-  }
-]
+        visibility: "off",
+      },
+    ],
+  },
+];
 
-
-const layers = require("json-loader!./commaps.geojson");
-const moreLayers = require("json-loader!./hearings.geojson");
+const representable = require("json-loader!./representable.geojson");
+const hearings = require("json-loader!./hearings.geojson");
 
 async function initMap() {
   const myLatlng = { lat: 41.8348769, lng: -87.7881208 };
@@ -52,10 +51,10 @@ async function initMap() {
   const map = new google.maps.Map(document.getElementById("map")!, {
     zoom: 11.5,
     center: myLatlng,
-    styles: stylesArray
+    styles: stylesArray,
   });
-  map.data.addGeoJson(layers);
-  map.data.addGeoJson(moreLayers);
+  map.data.addGeoJson(representable, { idPropertyName: "file" });
+  map.data.addGeoJson(hearings, { idPropertyName: "jsonfile" });
   map.data.setStyle({ clickable: false });
   map.data.setStyle(function (feature) {
     var color = "gray";
@@ -77,12 +76,12 @@ async function initMap() {
     content: "Click the map to get Lat/Lng!",
     position: myLatlng,
   });
-  infoWindow.open(map);
+  // infoWindow.open(map);
 
   // Configure the click listener.
   map.addListener("click", (mapsMouseEvent) => {
     // Close the current InfoWindow.
-    const output:Array<string> = [];
+    const text = document.createElement("div");
 
     map.data.forEach((x) => {
       const g = x.getGeometry();
@@ -97,30 +96,41 @@ async function initMap() {
           )
         ) {
           let label;
+          let id;
           // console.log(testPoly);
-          if(x.getProperty('jsonfile') != null)
-            label = `hearing: ${x.getProperty('jsonfile')}`;
-          else
-            label = `representable: ${x.getProperty('file').split('/')[1]}`
-
-          output.push(label)
-          x.forEachProperty((x,y) => console.log(`x:${x}\ny:${y}`))
+          if (x.getProperty("jsonfile") != null) {
+            id = x.getProperty("jsonfile");
+            label = `hearing: ${id.substring(0,id.lastIndexOf('.json'))}`;
+          } else {
+            label = `representable: ${x.getProperty("file").split("/")[1]}`;
+            id = x.getProperty("file");
+          }
+          const child = document.createElement("div");
+          child.innerText = label;
+          child.addEventListener("click", () => {
+            map.data.forEach((feature) =>
+              feature.setProperty("isColorful", false)
+            );
+            map.data.getFeatureById(id)?.setProperty("isColorful", true);
+          });
+          child.classList.add('clickable')
+          text.appendChild(child);
+          // output.push(label)
+          x.forEachProperty((x, y) => console.log(`x:${x}\ny:${y}`));
           x.setProperty("isColorful", true);
         } else x.setProperty("isColorful", false);
-        // console.log(x.getGeometry()?.getType());
       }
-      // google.maps.geometry.poly.containsLocation(mapsMouseEvent.latLng,x.getGeometry() as google.maps.Data.Polygon)
     });
     infoWindow.close();
-
-    // Create a new InfoWindow.
-    infoWindow = new google.maps.InfoWindow({
-      position: mapsMouseEvent.latLng,
-    });
-    infoWindow.setContent(output.join("<br/>")
-      // JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
-    );
-    infoWindow.open(map);
+      // Create a new InfoWindow.
+      infoWindow = new google.maps.InfoWindow({
+        position: mapsMouseEvent.latLng,
+      });
+      infoWindow.setContent(
+        text // output.join("<br/>")
+        // JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+      );
+      infoWindow.open(map);
   });
 }
 
