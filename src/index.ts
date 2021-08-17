@@ -98,15 +98,30 @@ async function initMap() {
           empty = false;
           let label;
           let id;
+          let prefix;
           if (x.getProperty("jsonfile") != null) {
+            prefix = 'hearing: '
             id = x.getProperty("jsonfile");
-            label = `hearing: ${id.substring(0, id.lastIndexOf(".json"))}`;
+            label = `${id.substring(0, id.lastIndexOf(".json"))}`;
           } else {
-            label = `representable: ${x.getProperty("file").split("/")[1]}`;
+            prefix = 'representable: '
+            label = `${x.getProperty("file").split("/")[1]}`;
             id = x.getProperty("file");
           }
           const child = document.createElement("div");
-          child.innerText = label;
+          if(x.getProperty('url') != null){
+            const sp = document.createElement('span')
+            sp.innerText = prefix;
+            const anchor = document.createElement("a")
+            anchor.href = x.getProperty('url')
+            anchor.target="_blank"
+            anchor.innerText = label
+            child.appendChild(sp)
+            child.appendChild(anchor)
+          }
+          else{
+            child.innerText = prefix + label;
+          }
           child.addEventListener("click", () => {
             map.data.forEach((feature) =>
               feature.setProperty("isColorful", false)
