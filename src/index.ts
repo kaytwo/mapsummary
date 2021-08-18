@@ -51,7 +51,7 @@ async function initMap() {
   const map = new google.maps.Map(document.getElementById("map")!, {
     zoom: 11.5,
     center: myLatlng,
-    styles: stylesArray,
+    // styles: stylesArray,
   });
   map.data.addGeoJson(representable, { idPropertyName: "file" });
   map.data.addGeoJson(hearings, { idPropertyName: "jsonfile" });
