@@ -44,6 +44,7 @@ const stylesArray = [
 
 const representable = require("json-loader!./representable.geojson");
 const hearings = require("json-loader!./hearings.geojson");
+const chicago = require("json-loader!./chicago.geojson");
 
 async function initMap() {
   const myLatlng = { lat: 41.8348769, lng: -87.7881208 };
@@ -55,6 +56,7 @@ async function initMap() {
   });
   map.data.addGeoJson(representable, { idPropertyName: "file" });
   map.data.addGeoJson(hearings, { idPropertyName: "jsonfile" });
+  map.data.addGeoJson(chicago, { idPropertyName: "chicago" });
   map.data.setStyle({ clickable: false });
   map.data.setStyle(function (feature) {
     var color = "gray";
